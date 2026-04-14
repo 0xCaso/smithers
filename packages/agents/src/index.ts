@@ -14,5 +14,7 @@ export { PiAgent } from "./PiAgent";
 export type { PiExtensionUiRequest, PiExtensionUiResponse, PiAgentOptions } from "./PiAgent";
 export { KimiAgent } from "./KimiAgent";
 export { ForgeAgent } from "./ForgeAgent";
+export { OpenCodeAgent } from "./OpenCodeAgent";
+export type { OpenCodeAgentOptions } from "./OpenCodeAgent";
 export { zodToOpenAISchema } from "./zodToOpenAISchema";
 export { sanitizeForOpenAI } from "./sanitizeForOpenAI";

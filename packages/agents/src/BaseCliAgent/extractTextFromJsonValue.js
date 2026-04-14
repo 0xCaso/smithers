@@ -32,6 +32,8 @@ export function extractTextFromJsonValue(value) {
         return extractTextFromJsonValue(value.response);
     if (value.message)
         return extractTextFromJsonValue(value.message);
+    if (value.part)
+        return extractTextFromJsonValue(value.part);
     if (value.result)
         return extractTextFromJsonValue(value.result);
     if (value.output)
