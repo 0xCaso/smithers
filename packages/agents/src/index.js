@@ -15,6 +15,7 @@
 /** @typedef {import("./index.ts").PiAgentOptions} PiAgentOptions */
 /** @typedef {import("./index.ts").PiExtensionUiRequest} PiExtensionUiRequest */
 /** @typedef {import("./index.ts").PiExtensionUiResponse} PiExtensionUiResponse */
+/** @typedef {import("./index.ts").OpenCodeAgentOptions} OpenCodeAgentOptions */
 // @smithers-type-exports-end
 
 export { BaseCliAgent } from "./BaseCliAgent/index.js";
@@ -28,5 +29,6 @@ export { GeminiAgent } from "./GeminiAgent.js";
 export { PiAgent } from "./PiAgent.js";
 export { KimiAgent } from "./KimiAgent.js";
 export { ForgeAgent } from "./ForgeAgent.js";
+export { OpenCodeAgent } from "./OpenCodeAgent.js";
 export { zodToOpenAISchema } from "./zodToOpenAISchema.js";
 export { sanitizeForOpenAI } from "./sanitizeForOpenAI.js";
