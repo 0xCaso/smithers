@@ -4,6 +4,7 @@ import type { AgentCapabilityRegistry } from "../capability-registry";
 import { SmithersError } from "@smithers/errors/SmithersError";
 import type { BaseCliAgentOptions } from "./BaseCliAgentOptions";
 import type { CliOutputInterpreter } from "./CliOutputInterpreter";
+import type { SpawnCaptureResult } from "@smithers/driver/child-process";
 type CliCommandSpec = {
     command: string;
     args: string[];
@@ -51,4 +52,9 @@ export declare abstract class BaseCliAgent implements Agent<any, any, any> {
         options: any;
     }): Promise<CliCommandSpec>;
 }
+
+export type BaseCliAgentGenerateOptions = {
+    onProcessSpawn?: (child: { pid?: number }) => void;
+    onProcessExit?: (result: SpawnCaptureResult) => void;
+};
 export {};

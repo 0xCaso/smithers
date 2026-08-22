@@ -11,6 +11,8 @@ export type SpawnCaptureOptions = {
     detached?: boolean;
     onStdout?: (chunk: string) => void;
     onStderr?: (chunk: string) => void;
+    onSpawn?: (child: { pid: number | undefined }) => void;
+    onExit?: (result: SpawnCaptureResult) => void;
 };
 export type SpawnCaptureResult = {
     stdout: string;

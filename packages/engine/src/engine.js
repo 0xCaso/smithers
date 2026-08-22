@@ -597,6 +597,7 @@ const RUN_CANCEL_POLL_MS = 250;
 const TASK_HEARTBEAT_THROTTLE_MS = 500;
 const TASK_HEARTBEAT_MAX_PAYLOAD_BYTES = 1_000_000;
 const TASK_HEARTBEAT_TIMEOUT_CHECK_MS = 250;
+const AGENT_PROCESS_KEEPALIVE_HEARTBEAT_MS = 60_000;
 const MAX_CONTINUATION_STATE_BYTES = 10 * 1024 * 1024;
 /**
  * @param {Pick<TaskDescriptor, "nodeId" | "iteration">} task
@@ -2980,6 +2981,33 @@ async function legacyExecuteTask(adapter, db, runId, desc, descriptorMap, inputT
                         }
                     }, 100)
                     : undefined;
+                let agentProcessKeepaliveInterval;
+                const stopAgentProcessKeepalive = () => {
+                    if (agentProcessKeepaliveInterval) {
+                        clearInterval(agentProcessKeepaliveInterval);
+                        agentProcessKeepaliveInterval = undefined;
+                    }
+                };
+                const emitAgentProcessKeepalive = (pid) => {
+                    recordInternalHeartbeat({
+                        agentEngine: typeof attemptMeta.agentEngine === "string"
+                            ? attemptMeta.agentEngine
+                            : null,
+                        childProcess: {
+                            pid: typeof pid === "number" ? pid : null,
+                            state: "running",
+                        },
+                    });
+                };
+                const startAgentProcessKeepalive = (pid) => {
+                    emitAgentProcessKeepalive(pid);
+                    if (agentProcessKeepaliveInterval) {
+                        return;
+                    }
+                    agentProcessKeepaliveInterval = setInterval(() => {
+                        emitAgentProcessKeepalive(pid);
+                    }, AGENT_PROCESS_KEEPALIVE_HEARTBEAT_MS);
+                };
                 // Use fallback agent on retry attempts when available
                 let result;
                 try {
@@ -3002,6 +3030,12 @@ async function legacyExecuteTask(adapter, db, runId, desc, descriptorMap, inputT
                             timeout: desc.timeoutMs
                                 ? { totalMs: desc.timeoutMs }
                                 : undefined,
+                            onProcessSpawn: (child) => {
+                                startAgentProcessKeepalive(child?.pid);
+                            },
+                            onProcessExit: () => {
+                                stopAgentProcessKeepalive();
+                            },
                             onStdout: (text) => {
                                 recordInternalHeartbeat();
                                 emitOutput(text, "stdout");
@@ -3023,6 +3057,7 @@ async function legacyExecuteTask(adapter, db, runId, desc, descriptorMap, inputT
                     }));
                 }
                 finally {
+                    stopAgentProcessKeepalive();
                     if (hijackPollingInterval) {
                         clearInterval(hijackPollingInterval);
                     }

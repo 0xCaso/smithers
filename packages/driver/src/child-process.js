@@ -26,7 +26,7 @@ function truncateToBytes(text, maxBytes) {
  * @returns {Effect.Effect<SpawnCaptureResult, SmithersError>}
  */
 export function spawnCaptureEffect(command, args, options) {
-    const { cwd, env, input, signal, timeoutMs, idleTimeoutMs, maxOutputBytes = 200_000, detached = false, onStdout, onStderr, } = options;
+    const { cwd, env, input, signal, timeoutMs, idleTimeoutMs, maxOutputBytes = 200_000, detached = false, onStdout, onStderr, onSpawn, onExit, } = options;
     const errorDetails = {
         command,
         args,
@@ -55,6 +55,12 @@ export function spawnCaptureEffect(command, args, options) {
             detached,
             stdio: ["pipe", "pipe", "pipe"],
         });
+        try {
+            onSpawn?.({ pid: child.pid });
+        }
+        catch {
+            // Best-effort hook for external liveness tracking.
+        }
         /**
      * @param {string} reason
      * @param {"PROCESS_ABORTED" | "PROCESS_TIMEOUT" | "PROCESS_IDLE_TIMEOUT"} code
@@ -114,6 +120,12 @@ export function spawnCaptureEffect(command, args, options) {
                 clearTimeout(totalTimer);
             if (idleTimer)
                 clearTimeout(idleTimer);
+            try {
+                onExit?.(result);
+            }
+            catch {
+                // Best-effort hook for external liveness tracking.
+            }
             logDebug("child process completed", {
                 ...logAnnotations,
                 exitCode: result.exitCode,

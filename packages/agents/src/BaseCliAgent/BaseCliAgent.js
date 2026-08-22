@@ -758,6 +758,8 @@ export class BaseCliAgent {
                     idleTimeoutMs: callTimeouts.idleMs,
                     signal: options?.abortSignal,
                     maxOutputBytes: this.maxOutputBytes ?? options?.maxOutputBytes,
+                    onSpawn: options?.onProcessSpawn,
+                    onExit: options?.onProcessExit,
                     onStdout: (chunk) => {
                         stdoutEmitter?.push(chunk);
                         handleInterpreterChunk("stdout", chunk);
